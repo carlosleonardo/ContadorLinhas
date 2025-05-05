@@ -6,10 +6,14 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 
 public class ContadorLinhas {
+    private static final List<String> filtros = new ArrayList<>();
+
     public static void main(String[] args) {
         // Mostrar a ajuda do programa com commons-cli se não for passado
         // nenhum argumento
@@ -20,10 +24,24 @@ public class ContadorLinhas {
         opcoes.addOption("d", "diretorio", true, "Contar linhas de código em um diretório");
         try {
             var cmd = analisador.parse(opcoes, args);
+            leArquivoFiltros();
             processarComando(cmd, args);
         } catch (ParseException e) {
             System.out.printf("Erro ao analisar os argumentos: %s%n", e.getMessage());
         }
+    }
+
+    private static void leArquivoFiltros() {
+        // Lê o arquivo de filtros e retorna uma lista de extensões
+        try (var scanner = new Scanner(new File("filtros.txt"))) {
+            while (scanner.hasNextLine()) {
+                String extensao = scanner.nextLine();
+                filtros.add(extensao);
+            }
+        } catch (Exception e) {
+            System.out.printf("Erro ao ler o arquivo de filtros: %s%n", e.getMessage());
+        }
+
     }
 
     private static void processarComando(CommandLine cmd, String[] args) {
@@ -78,9 +96,7 @@ public class ContadorLinhas {
                     }
                 }
             }
-
         }
-
     }
 
     private static void contaLinhas(File subItem) {
@@ -89,8 +105,7 @@ public class ContadorLinhas {
             String nomeArquivo = subItem.getName();
             if (arquivoValido(nomeArquivo)) {
                 System.out.printf("Contando linhas do arquivo: %s%n", subItem.getAbsolutePath());
-                // Aqui você pode adicionar a lógica para contar as linhas de código
-                // Exemplo: apenas imprime o número de linhas
+
                 try (var scanner = new Scanner(subItem)) {
                     int numeroLinhas = 0;
                     while (scanner.hasNextLine()) {
@@ -107,6 +122,6 @@ public class ContadorLinhas {
     }
 
     private static boolean arquivoValido(String nomeArquivo) {
-        return nomeArquivo.endsWith(".java") || nomeArquivo.endsWith(".py");
+        return filtros.stream().anyMatch(nomeArquivo::endsWith);
     }
 }
