@@ -13,6 +13,7 @@ import java.util.Stack;
 
 public class ContadorLinhas {
     private static final List<String> filtros = new ArrayList<>();
+    private static int totalLinhas = 0;
 
     public static void main(String[] args) {
         // Mostrar a ajuda do programa com commons-cli se não for passado
@@ -26,6 +27,7 @@ public class ContadorLinhas {
             var cmd = analisador.parse(opcoes, args);
             leArquivoFiltros();
             processarComando(cmd, args);
+            System.out.printf("Número total de linhas: %d%n", totalLinhas);
         } catch (ParseException e) {
             System.out.printf("Erro ao analisar os argumentos: %s%n", e.getMessage());
         }
@@ -112,6 +114,7 @@ public class ContadorLinhas {
                         scanner.nextLine();
                         numeroLinhas++;
                     }
+                    totalLinhas += numeroLinhas;
                     System.out.printf("Número de linhas: %d%n", numeroLinhas);
                 } catch (Exception e) {
                     System.out.printf("Erro ao ler o arquivo: %s%n", e.getMessage());
